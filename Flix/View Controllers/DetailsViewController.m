@@ -8,6 +8,7 @@
 
 #import "DetailsViewController.h"
 #import "UIImageView+AFNetworking.h"
+#import "TrailerViewController.h"
 
 @interface DetailsViewController ()
 @property (weak, nonatomic) IBOutlet UIImageView *backdropView;
@@ -44,16 +45,35 @@
     // styling title and synopsis 
     [self.titleLabel sizeToFit];
     [self.synopsisLabel sizeToFit];
+    
+    self.posterView.userInteractionEnabled = YES;
+    
+    UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(Tapped:)];
+
+    tap.numberOfTapsRequired = 1;
+    
+    [self.posterView addGestureRecognizer:tap];
+    
 }
 
-/*
+-(void)Tapped:(UITapGestureRecognizer *)sender
+{
+    [self performSegueWithIdentifier:@"trailerSegue" sender:self];
+}
+
+
+
+
+
 #pragma mark - Navigation
 
 // In a storyboard-based application, you will often want to do a little preparation before navigation
 - (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
     // Get the new view controller using [segue destinationViewController].
     // Pass the selected object to the new view controller.
+    TrailerViewController *trailerViewController = [segue destinationViewController];
+    trailerViewController.selectedMovie = self.movie;
 }
-*/
+
 
 @end
