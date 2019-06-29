@@ -2,7 +2,7 @@
 
 **Flix** is a movies app using the [The Movie Database API](http://docs.themoviedb.apiary.io/#).
 
-Time spent: **15** hours spent in total
+Time spent: **18** hours spent in total
 
 ## User Stories
 
@@ -34,26 +34,28 @@ The following **additional** features are implemented:
 
 Please list two areas of the assignment you'd like to **discuss further with your peers** during the next class (examples include better ways to implement something, how to extend your app in certain ways, etc):
 
-1.
-2.
+1. Loading more movies than just the first page and loading them incrementally (rather than getting them all in one API call) - could this lead to infinite content? 
+2. More things with gestures - dragging, long tapping, etc. - when do we need to do them manually v. drag and drop?
 
 ## Video Walkthrough
 
 Here's a walkthrough of implemented user stories:
 
-<img src='http://i.imgur.com/link/to/your/gif/file.gif' title='Video Walkthrough' width='' alt='Video Walkthrough' />
+<img src='http://g.recordit.co/ubNiuoCQSZ.gif' width='' alt='Video Walkthrough' />
 
-GIF created with [LiceCap](http://www.cockos.com/licecap/).
+GIF created with [RecordIt](http://recordit.co/).
 
 ## Notes
 
 Describe any challenges encountered while building the app.
+One thing that was challenging was implementing the trailer feature, specifically associating a gesture to a specific element (the poster view), as it could only be done programmatically and not thro the normal associative drag and dropping. The search bar was also a bit confusing as the predicate takes a bit to figure out which exact object/element referenced. 
 
 ## Credits
 
 List an 3rd party libraries, icons, graphics, or other assets you used in your app.
 
 - [AFNetworking](https://github.com/AFNetworking/AFNetworking) - networking task library
+-[MBProgressHUD](https://github.com/matej/MBProgressHUD) - iOS drop-in loader class
 
 ## License
 
