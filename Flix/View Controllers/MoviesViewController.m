@@ -106,18 +106,43 @@
     MovieCell *cell = [tableView dequeueReusableCellWithIdentifier:@"MovieCell"];
     
     NSDictionary *movie = self.filteredMovies[indexPath.row];
-    cell.titleLabel.text = movie[@"title"];
-    cell.synopsisLabel.text = movie[@"overview"];
     
     // set up URL
     NSString *baseURLString = @"https://image.tmdb.org/t/p/w500";
     NSString *posterURLString = movie[@"poster_path"];
     NSString *fullPosterString = [baseURLString stringByAppendingString:posterURLString];
     NSURL *posterURL = [NSURL URLWithString:fullPosterString];
+    NSURLRequest *request = [NSURLRequest requestWithURL:posterURL];
     
+    cell.titleLabel.text = movie[@"title"];
+    cell.synopsisLabel.text = movie[@"overview"];
+    
+    // while downloading for image, fade them out to seem more natural
     cell.posterView.image = nil;
-    [cell.posterView setImageWithURL:posterURL];
-
+    [cell.posterView setImageWithURLRequest:request placeholderImage:nil
+                                    success:^(NSURLRequest *imageRequest, NSHTTPURLResponse *imageResponse, UIImage *image) {
+                                        
+                                        // imageResponse will be nil if the image is cached
+                                        if (imageResponse) {
+                                            cell.posterView.alpha = 0.0;
+                                            cell.titleLabel.alpha = 0.0;
+                                            cell.synopsisLabel.alpha = 0.0;
+                                            cell.posterView.image = image;
+                                            
+                                            //Animate UIImageView back to alpha 1 over 0.3sec
+                                            [UIView animateWithDuration:0.5 animations:^{
+                                                cell.titleLabel.alpha = 1.0;
+                                                cell.synopsisLabel.alpha = 1.0;
+                                                cell.posterView.alpha = 1.0;
+                                            }];
+                                        }
+                                        else {
+                                            cell.posterView.image = image;
+                                        }
+                                    }
+                                    failure:^(NSURLRequest *request, NSHTTPURLResponse * response, NSError *error) {
+                                        // do something for the failure condition
+                                    }];
     return cell;
 }
 
@@ -163,7 +188,7 @@
     // figuring out which movie is the sender and getting info
     UITableViewCell *tappedCell = sender;
     NSIndexPath *indexPath = [self.tableView indexPathForCell:tappedCell];
-    NSDictionary *movie = self.movies[indexPath.row];
+    NSDictionary *movie = self.filteredMovies[indexPath.row];
     
     // creating instance of the details class and designating destination page
     DetailsViewController *detailsViewController = [segue destinationViewController];

@@ -60,11 +60,10 @@
             // set up network alert
             UIAlertController *networkAlert = [UIAlertController alertControllerWithTitle:@"Cannot Get Movies"
                                                                                   message:@"The internet connection seems to be offline."
-                                                                           preferredStyle:(UIAlertControllerStyleAlert)];
+                                                                preferredStyle:(UIAlertControllerStyleAlert)];
             UIAlertAction *okAction = [UIAlertAction actionWithTitle:@"Try Again"
                                                                style:UIAlertActionStyleDefault
                                                              handler:^(UIAlertAction * _Nonnull action) {
-                                                                 // handle response here.
                                                                  [self fetchMovies];
                                                              }];
             [networkAlert addAction:okAction];
@@ -95,13 +94,51 @@
     NSDictionary *movie = self.filteredMovies[indexPath.item];
     
     // set up URL
-    NSString *baseURLString = @"https://image.tmdb.org/t/p/w500";
     NSString *posterURLString = movie[@"poster_path"];
-    NSString *fullPosterString = [baseURLString stringByAppendingString:posterURLString];
-    NSURL *posterURL = [NSURL URLWithString:fullPosterString];
+
+    NSString *smallURLString = @"https://image.tmdb.org/t/p/w45";
+    NSString *smallPosterString = [smallURLString stringByAppendingString:posterURLString];
+    NSURL *smallPosterURL = [NSURL URLWithString:smallPosterString];
+
+    NSString *bigURLString = @"https://image.tmdb.org/t/p/original";
+    NSString *bigPosterString = [bigURLString stringByAppendingString:posterURLString];
+    NSURL *bigPosterURL = [NSURL URLWithString:bigPosterString];
     
-    cell.posterView.image = nil;
-    [cell.posterView setImageWithURL:posterURL];
+    NSURLRequest *requestSmall = [NSURLRequest requestWithURL:smallPosterURL];
+    NSURLRequest *requestLarge = [NSURLRequest requestWithURL:bigPosterURL];
+    
+    [cell.posterView setImageWithURLRequest:requestSmall placeholderImage:nil
+                                    success:^(NSURLRequest *imageRequest, NSHTTPURLResponse *imageResponse, UIImage *smallImage) {
+                                        
+                                        cell.posterView.alpha = 0.0;
+                                        cell.posterView.image = smallImage;
+                                        
+                                        [UIView animateWithDuration:0.3
+                                                         animations:^{
+                                                             cell.posterView.alpha = 1.0;
+                                                         } completion:^(BOOL finished) {
+                                                             // The AFNetworking ImageView Category only allows one request to be sent at a time
+                                                             // per ImageView. This code must be in the completion block.
+                                                             [cell.posterView setImageWithURLRequest:requestLarge
+                                                                                       placeholderImage:smallImage
+                                                                                                success:^(NSURLRequest *request, NSHTTPURLResponse *response, UIImage * largeImage) {
+                                                                                                    cell.posterView.image = largeImage;
+                                                                                                }
+                                                                                                failure:^(NSURLRequest *request, NSHTTPURLResponse *response, NSError *error) {
+                                                                                                    // do something for the failure condition of the large image request
+                                                                                                    // possibly setting the ImageView's image to a default image
+                                                                                                }];
+                                                         }];
+                                    }
+                                    failure:^(NSURLRequest *request, NSHTTPURLResponse *response, NSError *error) {
+                                        // do something for the failure condition
+                                        // possibly try to get the large image
+                                    }];
+    
+//    setting cell image with no animation
+//     cell.posterView.image = nil;
+//    [cell.posterView setImageWithURL:posterURL];
+    
     
     return cell;
 }
@@ -143,7 +180,7 @@
 - (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
     UICollectionViewCell *tappedCell = sender;
     NSIndexPath *indexPath = [self.collectionView indexPathForCell:tappedCell];
-    NSDictionary *movie = self.movies[indexPath.row];
+    NSDictionary *movie = self.filteredMovies[indexPath.row];
     
     // creating instance of the details class and designating destination page
     DetailsViewController *detailsViewController = [segue destinationViewController];
